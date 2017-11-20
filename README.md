@@ -33,6 +33,6 @@ Install all dependancies and start working:
 
 ## authors
 
-  - [@](), Claire Crapanzano
+  - [@Sqrtcc](), Claire Crapanzano
   - [@Minious](https://github.com/minious), Eliot Godard
   - [@Mcdostone](https://github.com/Mcdostone), Yann Prono
