@@ -1,13 +1,12 @@
 import csv
+from sklearn import tree
 
-
+indice = 0
 #Creating the 41 categories
-
 categories = []
 for i in range(42) :
     categories.append([])
-print(categories)
-indice = 0
+
 
 #File reading and putting data in categories 
 
@@ -20,14 +19,17 @@ with open('census-income-data.data', 'rb') as csvfile:
             indice+= 1
             if indice == 42 :
                 indice = 0
-            print(categories[0]) #return age, catgeory #41 is useless
+           # print(categories)  category #41 is useless
             
+#Tree creation
 
+#X = [categories]
+#Y = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,34,35,36,37,38,39,40,41]
+#clf = tree.DecisionTreeClassifier()
+#clf = clf.fit(X,Y)
 
+#Does not count strings in categories as viable variables -> everuthing is string
+#Need for one-hot-encoding (changing strings wit) 
 
-
-#Voir pour le decision tree http://scikit-learn.org/stable/modules/tree.html
-#Voir aussi si le prof accepte qu'on utilise ce genre de chose ou veut qu'on code tout ?
-
-
+#...Or we could use https://pypi.python.org/pypi/DecisionTree/3.4.3
 
