@@ -1,13 +1,13 @@
 """
-    Main script of our IA algorithm, d
-    eveloped by Claire Crapanzano, Eliot Godard, Yann Prono
+    Main script of our IA algorithm,
+    developed by Claire Crapanzano, Eliot Godard, Yann Prono
 """
 import sys
 import getopt
 import logging
 import argparse
-import coloredlogs
 import csv
+import coloredlogs
 from sklearn import tree
 
 
@@ -32,7 +32,6 @@ def read_data_file(filename):
                 indice += 1
                 if indice == 42:
                     indice = 0
-    print(categories)  #category #41 is useless
 
 
 def main(argv):
@@ -45,7 +44,7 @@ def main(argv):
         if len(opts) == 0:
             print_help()
             sys.exit(1)
-    except getopt.GetoptError as err:
+    except getopt.GetoptError:
         print_help()
         sys.exit(1)
 
@@ -56,6 +55,8 @@ def main(argv):
             datafile = arg
         LOGGER.info(f'Reading the datafile {datafile}')
         read_data_file(datafile)
+        LOGGER.info(f'Datafile {datafile} read with success')
+        
 
 
 
