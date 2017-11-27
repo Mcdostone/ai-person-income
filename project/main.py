@@ -1,26 +1,85 @@
+"""
+    Main script of our IA algorithm, d
+    eveloped by Claire Crapanzano, Eliot Godard, Yann Prono
+"""
+import sys
+import getopt
+import logging
+import argparse
+import coloredlogs
 import csv
 from sklearn import tree
 
-indice = 0
-#Creating the 41 categories
-categories = []
-for i in range(42) :
-    categories.append([])
+
+# Setup logger
+LOGGER = logging.getLogger(__name__)
+coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
-#File reading and putting data in categories 
+def read_data_file(filename):
+    """
+    Read the CSV file and prepare the data to make the decision tree.
+    """
+    categories = []
+    for i in range(42):
+        categories.append([])
+    indice = 0
+    with open(filename, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in reader:
+            for elements in row:
+                categories[indice].append(elements)
+                indice += 1
+                if indice == 42:
+                    indice = 0
+    print(categories)  #category #41 is useless
 
-with open('census-income-data.data', 'rb') as csvfile:
-    reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-    for row in reader:
-        for elements in row:
-            #print' '.join(row)  
-            categories[indice].append(elements)  
-            indice+= 1
-            if indice == 42 :
-                indice = 0
-           # print(categories)  category #41 is useless
-            
+
+def main(argv):
+    """ Main function, fetch the filename of data file and process the tree decision algorithm.
+        :param argv: args passed by the shell
+    """
+    datafile = ''
+    try:
+        opts, _ = getopt.getopt(argv, 'f:', ['file='])
+        if len(opts) == 0:
+            print_help()
+            sys.exit(1)
+    except getopt.GetoptError as err:
+        print_help()
+        sys.exit(1)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            print_help()
+        if opt in ('-f', '--file'):
+            datafile = arg
+        LOGGER.info(f'Reading the datafile {datafile}')
+        read_data_file(datafile)
+
+
+
+def print_help():
+    """
+    Print some help for the user
+    """
+    parser = argparse.ArgumentParser(
+        description='''Run the algorithm to create the decision tree. ''',
+        epilog=f'You can follow this example: python {__file__} -f census-income-data.data'
+    )
+    parser.add_argument('-f', '--file', type=str, nargs=1, help='data file to use to build the decision tree', required=True)
+    parser.parse_args()
+
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+
+
+
+
+
+
 #Tree creation
 
 #X = [categories]
