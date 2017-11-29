@@ -51,7 +51,9 @@ Install all dependancies and start working:
 
 ## Execution
 ``` bash
-    python main.py -f census-income-data.data
+    # If you want to work a subset of data
+    python project/main.py -f project/census-income-sample.data # or make
+    python project/main.py -f project/census-income-data.data # or make run -full    
 ```
 
 
@@ -103,6 +105,10 @@ Extract of the first line of the *`census-income-data.data`*
 |   39    |   0                                          |   veterans benefits                          |           |
 |   40    |   95                                         |   weeks worked in year                       |           |
 |   41    |   - 50000                                    |   year                                       |           |
+
+The value to determine is the last one. There are 2 possibles values:
+ - -50000
+ - 50000+
 
 
 ## authors

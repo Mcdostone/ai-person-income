@@ -19,6 +19,16 @@ LOGGER = logging.getLogger(__name__)
 coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
+def encode_target(df, column):
+    """ Sklearn can only do AI on integers.
+    So we need to transform all non-integer data into integers!
+    """
+    copy = df.copy()
+    targets = copy[column].unique()
+    map_to_int = {name: n for n, name in enumerate(targets)}
+    copy[column] = copy[column].replace(map_to_int)
+    return copy
+
 def import_data_file(filename):
     if os.path.exists(filename):
         return pandas.read_csv(filename, delimiter=',', skipinitialspace=True)
@@ -65,8 +75,12 @@ def main(argv):
             datafile = arg
         LOGGER.info(f'Reading the datafile {datafile}')
         df = import_data_file(datafile)
-        print('Income types:', df["INCOME"].unique(), sep="\n")
-        LOGGER.info(f'Datafile {datafile} read with success')
+        LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
+        print('', df.head(), sep="\n", end="\n\n")
+        LOGGER.info(f'Encoding non-integers data') 
+        df = encode_target(df, 'ACLSWKR')
+        LOGGER.info(f'Dataframe encoded') 
+        print('', df.head(), sep="\n", end="\n\n")
 
 def print_help():
     """
@@ -78,7 +92,6 @@ def print_help():
     )
     parser.add_argument('-f', '--file', type=str, nargs=1, help='data file to use to build the decision tree', required=True)
     parser.parse_args()
-
 
 
 if __name__ == "__main__":
