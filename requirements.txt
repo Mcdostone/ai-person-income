@@ -2,3 +2,5 @@ scikit-learn
 numpy
 scipy
 coloredlogs
+graphviz
+pandas

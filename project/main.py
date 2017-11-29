@@ -2,6 +2,7 @@
     Main script of our IA algorithm,
     developed by Claire Crapanzano, Eliot Godard, Yann Prono
 """
+import os
 import sys
 import getopt
 import logging
@@ -9,11 +10,20 @@ import argparse
 import csv
 import coloredlogs
 from sklearn import tree
-
+import graphviz
+import pandas
+from sklearn.datasets import load_iris
 
 # Setup logger
 LOGGER = logging.getLogger(__name__)
 coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
+
+
+def import_data_file(filename):
+    if os.path.exists(filename):
+        return pandas.read_csv(filename, delimiter=',', skipinitialspace=True)
+    else:
+        raise Exception(f'Cannot find {filename}')
 
 
 def read_data_file(filename):
@@ -25,7 +35,7 @@ def read_data_file(filename):
         categories.append([])
     indice = 0
     with open(filename, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        reader = csv.reader(csvfile, delimiter=',', encoding='us-ascii')
         for row in reader:
             for elements in row:
                 categories[indice].append(elements)
@@ -54,11 +64,9 @@ def main(argv):
         if opt in ('-f', '--file'):
             datafile = arg
         LOGGER.info(f'Reading the datafile {datafile}')
-        read_data_file(datafile)
+        df = import_data_file(datafile)
+        print('Income types:', df["INCOME"].unique(), sep="\n")
         LOGGER.info(f'Datafile {datafile} read with success')
-        
-
-
 
 def print_help():
     """
@@ -75,13 +83,6 @@ def print_help():
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-
-
-
-
-
-#Tree creation
 
 #X = [categories]
 #Y = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,34,35,36,37,38,39,40,41]

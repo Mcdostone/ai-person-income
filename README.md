@@ -9,7 +9,7 @@ permettre de gagner plus d’information à partir de ces donnees brutes.
 
 ## Our work
 
-Le but du projet est de concevoir est entrainer un arbre de d´ecision pour classer le
+Le but du projet est de concevoir est entrainer un arbre de décision pour classer le
 niveau de rémunération des adultes Américains. Celui-ci dépend de plusieurs variables
 démographiques et sociales.
 Le choix de la plate-forme de développement et du langage de programmation est libre
