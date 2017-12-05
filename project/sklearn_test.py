@@ -5,6 +5,8 @@ from sklearn import linear_model
 from sklearn.svm import LinearSVC
 from sklearn import preprocessing as pp
 import pandas as pd
+from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
 
 data = pd.read_csv("census-income-data.data", skipinitialspace=True, usecols=list(range(0, 41)))
 data = data.fillna('Missing value').apply(pp.LabelEncoder().fit_transform)
@@ -40,7 +42,17 @@ scoreSGD = clfSGD.score(data, target.target)
 print("Taux d'erreur SGDClassifier : %.1f" % ((1 - scoreSGD) * 100) + '%')
 '''
 
+'''
 clfSVC = LinearSVC(random_state=0)
-clfSVC.fit(data, target.target)
+clfSVC = clfSVC.fit(data, target.target)
 scoreSVC = clfSVC.score(dataTest, targetTest.target)
+print(clfSVC.coef_)
 print("Taux d'erreur LinearSVC : %.1f" % ((1 - scoreSVC) * 100) + '%')
+tree.export_graphviz(clfSVC, out_file='tree.dot')
+'''
+
+clfTree = DecisionTreeClassifier(random_state=0)
+clfTree = clfTree.fit(data, target.target)
+scoreTree = clfTree.score(dataTest, targetTest.target)
+print("Taux d'erreur DecisionTreeClassifier : %.1f" % ((1 - scoreTree) * 100) + '%')
+tree.export_graphviz(clfTree, out_file='tree.dot')
