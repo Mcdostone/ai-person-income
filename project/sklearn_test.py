@@ -9,7 +9,7 @@ from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 
 data = pd.read_csv("census-income-data.data", skipinitialspace=True, usecols=list(range(0, 41)))
-data = data.fillna('Missing value').apply(pp.LabelEncoder().fit_transform)
+data = data.fillna('Missing value')#.apply(pp.LabelEncoder().fit_transform)
 
 target = pd.read_csv("census-income-data.data", skipinitialspace=True, usecols=[41])
 
@@ -51,7 +51,7 @@ print("Taux d'erreur LinearSVC : %.1f" % ((1 - scoreSVC) * 100) + '%')
 tree.export_graphviz(clfSVC, out_file='tree.dot')
 '''
 
-clfTree = DecisionTreeClassifier(random_state=0)
+clfTree = DecisionTreeClassifier(random_state=0, max_depth=5)
 clfTree = clfTree.fit(data, target.target)
 scoreTree = clfTree.score(dataTest, targetTest.target)
 print("Taux d'erreur DecisionTreeClassifier : %.1f" % ((1 - scoreTree) * 100) + '%')
