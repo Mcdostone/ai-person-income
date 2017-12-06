@@ -9,6 +9,7 @@ import getopt
 import logging
 import argparse
 import csv
+from encoder import Encoder
 from sklearn.externals.six import StringIO
 import numpy as np
 import coloredlogs
@@ -46,8 +47,8 @@ class DecisionTreeBuilder:
         graph.render(filename) 
 
     def encode(self):
-        for col in self.categories:
-            self.df[col] = pandas.factorize(self.df[col])[0]
+        encoder = Encoder(self.df)
+        self.df = encoder.encode() 
         self.normalize_target()
 
     def get_data(self):
@@ -60,6 +61,12 @@ class DecisionTreeBuilder:
         self.df[self.target] = self.df[self.target].replace('- 50000.', -1)
         self.df[self.target] = self.df[self.target].replace('50000+.', 1)
         return self.df
+    
+    def export_current_df(self, filename):
+        self.df.to_csv(filename, index=False)
+    
+    def print_dataframe(self):
+        print(self.df.head())
 
 
 
@@ -79,9 +86,10 @@ def main(argv):
     """
     datafile = ''
     testfile = ''
+    exportfile = ''
     savefile = None
     try:
-        opts, _ = getopt.getopt(argv, 'f:t:s:', ['file=', 'test=', 'save='])
+        opts, _ = getopt.getopt(argv, 'f:t:s:e:', ['file=', 'test=', 'save=', 'export='])
         if len(opts) == 0:
             print_help()
             sys.exit(1)
@@ -98,15 +106,24 @@ def main(argv):
             testfile = arg
         if opt in ('-s', '--save'):
             savefile = arg
-        
+        if opt in ('-e', '--export'):
+            exportfile = arg
+
     if len(opts) >= 2:
         df = import_data_file(datafile)
         builderData = DecisionTreeBuilder(df, 'target') 
         LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
+
+        
         ################################
         ### BUILD THE TREE DECISION ####
         ################################
+        #builderData.encode()
         builderData.encode()
+
+        if exportfile:
+            LOGGER.info(f'Export the encoded dataframe into {exportfile}')
+            builderData.export_current_df(exportfile)
 
         clf = DecisionTreeClassifier(max_depth=4)
         clf = clf.fit(builderData.get_data(), builderData.get_target())
@@ -123,7 +140,7 @@ def main(argv):
         scoreTree = clf.score(builderTest.get_data(), builderTest.get_target())
         print("Taux d'erreur: %.1f" % ((1 - scoreTree) * 100) + '%')
     else:
-        print('Missing some options')
+        print_help()
 
         
 def print_help():
@@ -137,6 +154,7 @@ def print_help():
     parser.add_argument('-f', '--file', type=str, nargs=1, help='data file to use to build the decision tree', required=True)
     parser.add_argument('-t', '--test', type=str, nargs=1, help='test file to use for the evaluation of the decision tree', required=True)
     parser.add_argument('-s', '--save', type=str, nargs=1, help='Save the decision tree in a PDF file')
+    parser.add_argument('-e', '--export', type=str, nargs=1, help='Export the encoded file')
     parser.parse_args()
 
 
