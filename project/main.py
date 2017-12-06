@@ -23,73 +23,64 @@ LOGGER = logging.getLogger(__name__)
 coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
+class DecisionTreeBuilder:
+    
+    def __init__(self, dataframe, target):
+        self.df = dataframe
+        self.categories = list(dataframe.columns.values)
+        self.target = target
+        self.categories.remove(self.target)
+
+    def save_to_pdf(self, classifier, classes):
+        dot_data = tree.export_graphviz(
+            classifier,
+            out_file=None,  
+            feature_names=np.array(self.categories),
+            class_names=classes,  
+            filled=True,
+            rounded=True,  
+            special_characters=True
+        )
+        graph = graphviz.Source(dot_data) 
+        graph.render('income') 
+
+    def encode(self):
+        for col in self.categories:
+            self.df[col] = pandas.factorize(self.df[col])[0]
+        self.normalize_target()
+
+    def get_data(self):
+        return self.df[self.categories]
+    
+    def get_target(self):
+        return self.df[self.target]
+
+    def normalize_target(self):
+        self.df[self.target] = self.df[self.target].replace('- 50000.', -1)
+        self.df[self.target] = self.df[self.target].replace('50000+.', 1)
+        return self.df
+
+
+
+######################
+#### Util methods ####
+######################
 def import_data_file(filename):
     if os.path.exists(filename):
         return pandas.read_csv(filename, delimiter=',', skipinitialspace=True)
     else:
         raise Exception(f'Cannot find {filename}')
-
-def normalize_target(df, column='target'):
-    df[column] = df[column].replace('- 50000.', -1)
-    df[column] = df[column].replace('50000+.', 1)
-    return df
-
-def save_to_svg(classifier, categories, classes):
-    dot_data = tree.export_graphviz(
-        classifier,
-        out_file=None,  
-        feature_names=categories,
-        class_names=classes,  
-        filled=True,
-        rounded=True,  
-        special_characters=True
-    )
-    graph = graphviz.Source(dot_data) 
-    graph.render('income') 
-    #graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-    #SVG(graph.create(format='svg'))
-
-
-def make_decision_tree(filename, target_column = 'target'):
-    LOGGER.info(f'Reading the datafile {filename}')
-    df = import_data_file(filename)                
-    
-    ###################################
-    ### GET INFORMATION ABOUT DATA ####
-    ###################################
-    LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
-    categories = list(df.columns.values)
-    categories.remove(target_column)
-    
-    ##################################
-    ### TRANSFORM STRING INTO INT ####
-    ##################################
-    for col in categories:
-        df[col] = pandas.factorize(df[col])[0]
-    
-    #################################
-    ### FORMAT OUR TARGET VALUE  ####
-    #################################
-    df = normalize_target(df)
-    classifier = DecisionTreeClassifier(max_depth=4)
-    
-    ################################
-    ### BUILD THE TREE DECISION ####
-    ################################
-    classifier = classifier.fit(df[categories], df[target_column])
-    
-    ################################
-    ### SAVE FOR VISUAL RESULTS ####
-    ################################
-    save_to_svg(classifier, np.array(categories), ['Poor', 'Rich'])
-
+ 
 
 def main(argv):
     """ Main function, fetch the filename of data file and process the tree decision algorithm.
         :param argv: args passed by the shell
     """
+    datafile = ''
+    testfile = ''
+    saveFlag = False
     try:
-        opts, _ = getopt.getopt(argv, 'f:', ['file='])
+        opts, _ = getopt.getopt(argv, 'f:t:s', ['file=', 'test=', 'save'])
         if len(opts) == 0:
             print_help()
             sys.exit(1)
@@ -101,7 +92,36 @@ def main(argv):
         if opt == '-h':
             print_help()
         if opt in ('-f', '--file'):
-            make_decision_tree(arg)
+            datafile = arg
+        if opt in ('-t', '--test'):
+            testfile = arg
+        if opt in ('-s', '--save'):
+            saveFlag = True
+        
+    if len(opts) >= 2:
+        df = import_data_file(datafile)
+        builderData = DecisionTreeBuilder(df, 'target') 
+        LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
+        ################################
+        ### BUILD THE TREE DECISION ####
+        ################################
+        builderData.encode()
+
+        clf = DecisionTreeClassifier(max_depth=4)
+        clf = clf.fit(builderData.get_data(), builderData.get_target())
+        ################################
+        ### SAVE FOR VISUAL RESULTS ####
+        ################################
+
+        if saveFlag:
+            builderData.save_to_pdf(clf, ['Poor', 'Rich'])
+        
+        dfTest = import_data_file(testfile)
+        builderTest = DecisionTreeBuilder(df, 'target') 
+        scoreTree = clf.score(builderTest.get_data(), builderTest.get_target())
+        print("Taux d'erreur: %.1f" % ((1 - scoreTree) * 100) + '%')
+    else:
+        print('Missing some options')
 
         
 def print_help():
