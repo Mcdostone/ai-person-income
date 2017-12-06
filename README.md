@@ -94,9 +94,9 @@ Extract of the first line of the *`census-income-data.data`*
 |   26    |   ?                                          |   migration code-change in reg               |           |
 |   27    |   ?                                          |   migration code-move within reg             |           |
 |   28    |   Not in universe under 1 year old           |   live in this house 1 year ago              |           |
-|   29    |   0                                          |   migration prev res in sunbelt              |           |
-|   30    |   Not in universe                            |   num persons worked for employer            |           |
-|   31    |   United-States                              |   family members under 18                    |           |
+|   29    |   ?                                          |   migration prev res in sunbelt              |           |
+|   30    |   0                                          |   num persons worked for employer            |           |
+|   31    |   Not in universe                            |   family members under 18                    |           |
 |   32    |   United-States                              |   country of birth father                    |           |
 |   33    |   United-States                              |   country of birth mother                    |           |
 |   34    |   United-States                              |   country of birth self                      |           |
@@ -106,7 +106,7 @@ Extract of the first line of the *`census-income-data.data`*
 |   38    |   2                                          |   veterans benefits                          |           |
 |   39    |   0                                          |   weeks worked in year                       |           |
 |   41    |   95                                         |   Year                                       |           |
-|   42    |   - 50000                                    |                                              |           |
+|   42    |   - 50000                                    |   Target                                     |           |
 
 
 
