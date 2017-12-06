@@ -135,6 +135,8 @@ def print_help():
         epilog=f'You can follow this example: python {__file__} -f census-income-data.data'
     )
     parser.add_argument('-f', '--file', type=str, nargs=1, help='data file to use to build the decision tree', required=True)
+    parser.add_argument('-t', '--test', type=str, nargs=1, help='test file to use for the evaluation of the decision tree', required=True)
+    parser.add_argument('-s', '--save', type=str, nargs=1, help='Save the decision tree in a PDF file')
     parser.parse_args()
 
 
