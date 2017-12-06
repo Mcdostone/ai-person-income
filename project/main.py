@@ -9,9 +9,11 @@ import getopt
 import logging
 import argparse
 import csv
+from sklearn.externals.six import StringIO
 import numpy as np
 import coloredlogs
 from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn.preprocessing import LabelEncoder
 import graphviz
 import pandas
@@ -23,29 +25,69 @@ coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(mes
 
 def import_data_file(filename):
     if os.path.exists(filename):
-        return pandas.read_csv(filename, delimiter=',', header=None, skipinitialspace=True)
+        return pandas.read_csv(filename, delimiter=',', skipinitialspace=True)
     else:
         raise Exception(f'Cannot find {filename}')
 
-def encode(df, le):
-    n = df.copy()
-    if(len(n.shape) == 1):
-        le.fit(n.values)
-        n = le.transform(n)
-    else:
-        for col in n.columns.values:
-            if n[col].dtypes == 'object':
-                le.fit(n[col].values)
-                n[col] = le.transform(n[col])
+def normalize_target(df, column='target'):
+    df[column] = df[column].replace('- 50000.', -1)
+    df[column] = df[column].replace('50000+.', 1)
+    return df
 
-    return n
+def save_to_svg(classifier, categories, classes):
+    dot_data = tree.export_graphviz(
+        classifier,
+        out_file=None,  
+        feature_names=categories,
+        class_names=classes,  
+        filled=True,
+        rounded=True,  
+        special_characters=True
+    )
+    graph = graphviz.Source(dot_data) 
+    graph.render('income') 
+    #graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    #SVG(graph.create(format='svg'))
+
+
+def make_decision_tree(filename, target_column = 'target'):
+    LOGGER.info(f'Reading the datafile {filename}')
+    df = import_data_file(filename)                
+    
+    ###################################
+    ### GET INFORMATION ABOUT DATA ####
+    ###################################
+    LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
+    categories = list(df.columns.values)
+    categories.remove(target_column)
+    
+    ##################################
+    ### TRANSFORM STRING INTO INT ####
+    ##################################
+    for col in categories:
+        df[col] = pandas.factorize(df[col])[0]
+    
+    #################################
+    ### FORMAT OUR TARGET VALUE  ####
+    #################################
+    df = normalize_target(df)
+    classifier = DecisionTreeClassifier(max_depth=4)
+    
+    ################################
+    ### BUILD THE TREE DECISION ####
+    ################################
+    classifier = classifier.fit(df[categories], df[target_column])
+    
+    ################################
+    ### SAVE FOR VISUAL RESULTS ####
+    ################################
+    save_to_svg(classifier, np.array(categories), ['Poor', 'Rich'])
 
 
 def main(argv):
     """ Main function, fetch the filename of data file and process the tree decision algorithm.
         :param argv: args passed by the shell
     """
-    datafile = ''
     try:
         opts, _ = getopt.getopt(argv, 'f:', ['file='])
         if len(opts) == 0:
@@ -59,27 +101,9 @@ def main(argv):
         if opt == '-h':
             print_help()
         if opt in ('-f', '--file'):
-            datafile = arg
-        LOGGER.info(f'Reading the datafile {datafile}')
-        df = import_data_file(datafile)
-        LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
-        X = df[list(range(4))]
-        Y = df[df.shape[1] - 1]
-        classifier = tree.DecisionTreeClassifier()
+            make_decision_tree(arg)
 
-        le = LabelEncoder()
-        transformedX = encode(X, le)
-        transformedY = encode(Y, le)
-        classifier = classifier.fit(transformedX, transformedY)
-        dot_data = tree.export_graphviz(classifier, 
-            out_file=None,
-            filled=True, 
-            rounded=True,
-        )
-            #class_names=np.chararray(['poor', 'rich']))
-        graph = graphviz.Source(dot_data) 
-        graph.render('income') 
-
+        
 def print_help():
     """
     Print some help for the user
@@ -94,14 +118,3 @@ def print_help():
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-#X = [categories]
-#Y = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,34,35,36,37,38,39,40,41]
-#clf = tree.DecisionTreeClassifier()
-#clf = clf.fit(X,Y)
-
-#Does not count strings in categories as viable variables -> everuthing is string
-#Need for one-hot-encoding (changing strings wit) 
-
-#...Or we could use https://pypi.python.org/pypi/DecisionTree/3.4.3
-
