@@ -31,7 +31,8 @@ class DecisionTreeBuilder:
         self.target = target
         self.categories.remove(self.target)
 
-    def save_to_pdf(self, classifier, classes):
+    def save_to_pdf(self, filename, classifier, classes):
+        filename = filename.replace('.pdf', '')
         dot_data = tree.export_graphviz(
             classifier,
             out_file=None,  
@@ -42,7 +43,7 @@ class DecisionTreeBuilder:
             special_characters=True
         )
         graph = graphviz.Source(dot_data) 
-        graph.render('income') 
+        graph.render(filename) 
 
     def encode(self):
         for col in self.categories:
@@ -78,9 +79,9 @@ def main(argv):
     """
     datafile = ''
     testfile = ''
-    saveFlag = False
+    savefile = None
     try:
-        opts, _ = getopt.getopt(argv, 'f:t:s', ['file=', 'test=', 'save'])
+        opts, _ = getopt.getopt(argv, 'f:t:s:', ['file=', 'test=', 'save='])
         if len(opts) == 0:
             print_help()
             sys.exit(1)
@@ -96,7 +97,7 @@ def main(argv):
         if opt in ('-t', '--test'):
             testfile = arg
         if opt in ('-s', '--save'):
-            saveFlag = True
+            savefile = arg
         
     if len(opts) >= 2:
         df = import_data_file(datafile)
@@ -113,8 +114,9 @@ def main(argv):
         ### SAVE FOR VISUAL RESULTS ####
         ################################
 
-        if saveFlag:
-            builderData.save_to_pdf(clf, ['Poor', 'Rich'])
+        if savefile:
+            LOGGER.info(f'Save tree decision into {savefile}') 
+            builderData.save_to_pdf(savefile, clf, ['Poor', 'Rich'])
         
         dfTest = import_data_file(testfile)
         builderTest = DecisionTreeBuilder(df, 'target') 
