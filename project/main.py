@@ -2,56 +2,43 @@
     Main script of our IA algorithm,
     developed by Claire Crapanzano, Eliot Godard, Yann Prono
 """
+from sklearn.datasets import load_iris
 import os
 import sys
 import getopt
 import logging
 import argparse
 import csv
+import numpy as np
 import coloredlogs
 from sklearn import tree
+from sklearn.preprocessing import LabelEncoder
 import graphviz
 import pandas
-from sklearn.datasets import load_iris
 
 # Setup logger
 LOGGER = logging.getLogger(__name__)
 coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
-def encode_target(df, column):
-    """ Sklearn can only do AI on integers.
-    So we need to transform all non-integer data into integers!
-    """
-    copy = df.copy()
-    targets = copy[column].unique()
-    map_to_int = {name: n for n, name in enumerate(targets)}
-    copy[column] = copy[column].replace(map_to_int)
-    return copy
-
 def import_data_file(filename):
     if os.path.exists(filename):
-        return pandas.read_csv(filename, delimiter=',', skipinitialspace=True)
+        return pandas.read_csv(filename, delimiter=',', header=None, skipinitialspace=True)
     else:
         raise Exception(f'Cannot find {filename}')
 
+def encode(df, le):
+    n = df.copy()
+    if(len(n.shape) == 1):
+        le.fit(n.values)
+        n = le.transform(n)
+    else:
+        for col in n.columns.values:
+            if n[col].dtypes == 'object':
+                le.fit(n[col].values)
+                n[col] = le.transform(n[col])
 
-def read_data_file(filename):
-    """
-    Read the CSV file and prepare the data to make the decision tree.
-    """
-    categories = []
-    for i in range(42):
-        categories.append([])
-    indice = 0
-    with open(filename, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', encoding='us-ascii')
-        for row in reader:
-            for elements in row:
-                categories[indice].append(elements)
-                indice += 1
-                if indice == 42:
-                    indice = 0
+    return n
 
 
 def main(argv):
@@ -76,11 +63,22 @@ def main(argv):
         LOGGER.info(f'Reading the datafile {datafile}')
         df = import_data_file(datafile)
         LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
-        print('', df.head(), sep="\n", end="\n\n")
-        LOGGER.info(f'Encoding non-integers data') 
-        df = encode_target(df, 'ACLSWKR')
-        LOGGER.info(f'Dataframe encoded') 
-        print('', df.head(), sep="\n", end="\n\n")
+        X = df[list(range(4))]
+        Y = df[df.shape[1] - 1]
+        classifier = tree.DecisionTreeClassifier()
+
+        le = LabelEncoder()
+        transformedX = encode(X, le)
+        transformedY = encode(Y, le)
+        classifier = classifier.fit(transformedX, transformedY)
+        dot_data = tree.export_graphviz(classifier, 
+            out_file=None,
+            filled=True, 
+            rounded=True,
+        )
+            #class_names=np.chararray(['poor', 'rich']))
+        graph = graphviz.Source(dot_data) 
+        graph.render('income') 
 
 def print_help():
     """
