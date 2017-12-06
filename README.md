@@ -61,9 +61,11 @@ Install all dependancies and start working:
 
 Extract of the first line of the *`census-income-data.data`*
 
+
+
 | Index   | Example of value                             | Description                                  | To ignore |
 |:-------:|:---------------------------------------------|:---------------------------------------------|:----------|
-|    0    |   73                                         |   age                                        |           |
+|    0    |   73                                         |   age                                        |           |   
 |    1    |   Not in universe                            |   class of worker                            |           |
 |    2    |   0                                          |   detailed industry recode                   |           |
 |    3    |   0                                          |   detailed occupation recode                 |           |
@@ -87,24 +89,27 @@ Extract of the first line of the *`census-income-data.data`*
 |   21    |   Not in universe                            |   state of previous residence                |           |
 |   22    |   Other Rel 18+ ever marr not in subfamily   |   detailed household and family stat         |           |
 |   23    |   Other relative of householder              |   detailed household summary in household    |           |
-|   *24*  |   *1700.09*                                  |   *instance weight*                            | **True**  |
-|   *25*  |   *?*                                        |   *instance weight*                            | **True**  |
-|   26    |   ?                                          |   migration code-change in msa               |           |
-|   27    |   ?                                          |   migration code-change in reg               |           |
-|   28    |   Not in universe under 1 year old           |   migration code-move within reg             |           |
-|   29    |   ?                                          |   live in this house 1 year ago              |           |
-|   30    |   0                                          |   migration prev res in sunbelt              |           |
-|   31    |   Not in universe                            |   num persons worked for employer            |           |
-|   32    |   United-States                              |   family members under 18                    |           |
-|   33    |   United-States                              |   country of birth father                    |           |
-|   34    |   United-States                              |   country of birth mother                    |           |
-|   35    |   Native- Born in the United States          |   country of birth self                      |           |
-|   36    |   0                                          |   citizenship                                |           |
-|   37    |   Not in universe                            |   own business or self employed              |           |
-|   38    |   2                                          |   fill inc questionnaire for veteran's admin |           |
-|   39    |   0                                          |   veterans benefits                          |           |
-|   40    |   95                                         |   weeks worked in year                       |           |
-|   41    |   - 50000                                    |   year                                       |           |
+|   *24*  |   *1700.09*                                  |   *instance weight*                          | **True**  |
+|   25    |   ?                                          |   migration code-change in msa               |           |
+|   26    |   ?                                          |   migration code-change in reg               |           |
+|   27    |   ?                                          |   migration code-move within reg             |           |
+|   28    |   Not in universe under 1 year old           |   live in this house 1 year ago              |           |
+|   29    |   ?                                          |   migration prev res in sunbelt              |           |
+|   30    |   0                                          |   num persons worked for employer            |           |
+|   31    |   Not in universe                            |   family members under 18                    |           |
+|   32    |   United-States                              |   country of birth father                    |           |
+|   33    |   United-States                              |   country of birth mother                    |           |
+|   34    |   United-States                              |   country of birth self                      |           |
+|   35    |   Native- Born in the United States          |   citizenship                                |           |
+|   36    |   0                                          |   own business or self employed              |           |
+|   37    |   Not in universe                            |   fill inc questionnaire fo.r veteran's admin|           |
+|   38    |   2                                          |   veterans benefits                          |           |
+|   39    |   0                                          |   weeks worked in year                       |           |
+|   41    |   95                                         |   Year                                       |           |
+|   42    |   - 50000                                    |   Target                                     |           |
+
+
+
 
 The value to determine is the last one. There are 2 possibles values:
  - -50000

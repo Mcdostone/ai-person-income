@@ -2,32 +2,26 @@
     Main script of our IA algorithm,
     developed by Claire Crapanzano, Eliot Godard, Yann Prono
 """
+from sklearn.datasets import load_iris
 import os
 import sys
 import getopt
 import logging
 import argparse
 import csv
+from sklearn.externals.six import StringIO
+import numpy as np
 import coloredlogs
 from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.preprocessing import LabelEncoder
 import graphviz
 import pandas
-from sklearn.datasets import load_iris
 
 # Setup logger
 LOGGER = logging.getLogger(__name__)
 coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
 
-
-def encode_target(df, column):
-    """ Sklearn can only do AI on integers.
-    So we need to transform all non-integer data into integers!
-    """
-    copy = df.copy()
-    targets = copy[column].unique()
-    map_to_int = {name: n for n, name in enumerate(targets)}
-    copy[column] = copy[column].replace(map_to_int)
-    return copy
 
 def import_data_file(filename):
     if os.path.exists(filename):
@@ -35,30 +29,65 @@ def import_data_file(filename):
     else:
         raise Exception(f'Cannot find {filename}')
 
+def normalize_target(df, column='target'):
+    df[column] = df[column].replace('- 50000.', -1)
+    df[column] = df[column].replace('50000+.', 1)
+    return df
 
-def read_data_file(filename):
-    """
-    Read the CSV file and prepare the data to make the decision tree.
-    """
-    categories = []
-    for i in range(42):
-        categories.append([])
-    indice = 0
-    with open(filename, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', encoding='us-ascii')
-        for row in reader:
-            for elements in row:
-                categories[indice].append(elements)
-                indice += 1
-                if indice == 42:
-                    indice = 0
+def save_to_svg(classifier, categories, classes):
+    dot_data = tree.export_graphviz(
+        classifier,
+        out_file=None,  
+        feature_names=categories,
+        class_names=classes,  
+        filled=True,
+        rounded=True,  
+        special_characters=True
+    )
+    graph = graphviz.Source(dot_data) 
+    graph.render('income') 
+    #graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+    #SVG(graph.create(format='svg'))
+
+
+def make_decision_tree(filename, target_column = 'target'):
+    LOGGER.info(f'Reading the datafile {filename}')
+    df = import_data_file(filename)                
+    
+    ###################################
+    ### GET INFORMATION ABOUT DATA ####
+    ###################################
+    LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
+    categories = list(df.columns.values)
+    categories.remove(target_column)
+    
+    ##################################
+    ### TRANSFORM STRING INTO INT ####
+    ##################################
+    for col in categories:
+        df[col] = pandas.factorize(df[col])[0]
+    
+    #################################
+    ### FORMAT OUR TARGET VALUE  ####
+    #################################
+    df = normalize_target(df)
+    classifier = DecisionTreeClassifier(max_depth=4)
+    
+    ################################
+    ### BUILD THE TREE DECISION ####
+    ################################
+    classifier = classifier.fit(df[categories], df[target_column])
+    
+    ################################
+    ### SAVE FOR VISUAL RESULTS ####
+    ################################
+    save_to_svg(classifier, np.array(categories), ['Poor', 'Rich'])
 
 
 def main(argv):
     """ Main function, fetch the filename of data file and process the tree decision algorithm.
         :param argv: args passed by the shell
     """
-    datafile = ''
     try:
         opts, _ = getopt.getopt(argv, 'f:', ['file='])
         if len(opts) == 0:
@@ -72,16 +101,9 @@ def main(argv):
         if opt == '-h':
             print_help()
         if opt in ('-f', '--file'):
-            datafile = arg
-        LOGGER.info(f'Reading the datafile {datafile}')
-        df = import_data_file(datafile)
-        LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
-        print('', df.head(), sep="\n", end="\n\n")
-        LOGGER.info(f'Encoding non-integers data') 
-        df = encode_target(df, 'ACLSWKR')
-        LOGGER.info(f'Dataframe encoded') 
-        print('', df.head(), sep="\n", end="\n\n")
+            make_decision_tree(arg)
 
+        
 def print_help():
     """
     Print some help for the user
@@ -96,14 +118,3 @@ def print_help():
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-#X = [categories]
-#Y = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,34,35,36,37,38,39,40,41]
-#clf = tree.DecisionTreeClassifier()
-#clf = clf.fit(X,Y)
-
-#Does not count strings in categories as viable variables -> everuthing is string
-#Need for one-hot-encoding (changing strings wit) 
-
-#...Or we could use https://pypi.python.org/pypi/DecisionTree/3.4.3
-
