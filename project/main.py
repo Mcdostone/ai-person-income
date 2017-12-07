@@ -21,6 +21,8 @@ import pandas
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 
 # Setup logger
 LOGGER = logging.getLogger(__name__)
@@ -139,16 +141,28 @@ def main(argv):
             builderData.save_to_pdf(savefile, clf, ['Poor', 'Rich'])
         
         dfTest = import_data_file(testfile)
-        builderTest = DecisionTreeBuilder(df, 'target') 
+        builderTest = DecisionTreeBuilder(dfTest, 'target') 
+        builderTest.encode()
         scoreTree = clf.score(builderTest.get_data(), builderTest.get_target())
         print("Taux d'erreur: %.1f" % ((1 - scoreTree) * 100) + '%')
+        
         y_true = builderTest.get_target()
         y_pred = clf.predict(builderTest.get_data())
         conf = confusion_matrix(y_true, y_pred)
-        print(conf)
-        sns.heatmap(conf, square=True, annot=True, fmt='g', cbar=False, xticklabels=['Poor', 'Rich'], yticklabels=['Poor', 'Rich'])
+        #print(conf)
+        sns.heatmap(conf, square=True, annot=True, fmt='g', cbar=False, xticklabels=['-50000', '+50000'], yticklabels=['-50000', '+50000'])
         plt.xlabel('valeurs prédites')
         plt.ylabel('valeurs réelles')
+
+        average_precision_poor = precision_score(y_true, y_pred, pos_label=0)
+        average_precision_rich = precision_score(y_true, y_pred, pos_label=1)
+        average_recall_poor = recall_score(y_true, y_pred, pos_label=0)
+        average_recall_rich = recall_score(y_true, y_pred, pos_label=1)
+        print('-50000 precision score: {0:0.2f}'.format(average_precision_poor))
+        print('+50000 precision score: {0:0.2f}'.format(average_precision_rich))
+        print('-50000 recall score: {0:0.2f}'.format(average_recall_poor))
+        print('+50000 recall score: {0:0.2f}'.format(average_recall_rich))
+        
         plt.show()
     else:
         print_help()
