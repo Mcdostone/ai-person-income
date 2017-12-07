@@ -23,6 +23,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
+import math
 
 # Setup logger
 LOGGER = logging.getLogger(__name__)
@@ -61,6 +62,9 @@ class DecisionTreeBuilder:
     
     def get_target(self):
         return self.df[self.target]
+    
+    def get_categories(self):
+        return self.categories
 
     def normalize_target(self):
         self.df[self.target] = self.df[self.target].replace('- 50000.', -1)
@@ -130,8 +134,15 @@ def main(argv):
             LOGGER.info(f'Export the encoded dataframe into {exportfile}')
             builderData.export_current_df(exportfile)
 
-        clf = DecisionTreeClassifier(random_state=0, max_depth=5, class_weight='balanced')
+        class_weight = {0: 1, 1: 100}
+        
+        clf = DecisionTreeClassifier(random_state=0, max_depth=7, class_weight='balanced')
         clf = clf.fit(builderData.get_data(), builderData.get_target())
+        features_importances = list(zip(builderData.get_categories(), ((math.ceil(x * 10000) / 100) for x in clf.feature_importances_)))
+        sorted_features_importances = sorted(features_importances, key=lambda x: x[1], reverse=True)
+        for i in sorted_features_importances:
+            print(i)
+        
         ################################
         ### SAVE FOR VISUAL RESULTS ####
         ################################
