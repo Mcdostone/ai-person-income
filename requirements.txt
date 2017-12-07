@@ -5,4 +5,5 @@ coloredlogs
 graphviz
 pandas
 pydotplus
-ipython[all]
+seaborn
+matplotlib
