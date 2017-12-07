@@ -130,7 +130,7 @@ def main(argv):
             LOGGER.info(f'Export the encoded dataframe into {exportfile}')
             builderData.export_current_df(exportfile)
 
-        clf = DecisionTreeClassifier(random_state=0, presort=True, max_depth=5)
+        clf = DecisionTreeClassifier(random_state=0, max_depth=5, class_weight='balanced')
         clf = clf.fit(builderData.get_data(), builderData.get_target())
         ################################
         ### SAVE FOR VISUAL RESULTS ####
