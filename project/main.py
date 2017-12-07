@@ -25,6 +25,11 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 import math
 
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn import linear_model
+from sklearn.svm import LinearSVC
+
 # Setup logger
 LOGGER = logging.getLogger(__name__)
 coloredlogs.install(logger=LOGGER, fmt='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -124,7 +129,7 @@ def main(argv):
         LOGGER.info(f'Data are loaded into memory: {df.shape[0]} x {df.shape[1]} table') 
 
         
-        ################################
+            ################################
         ### BUILD THE TREE DECISION ####
         ################################
         #builderData.encode()
@@ -137,7 +142,12 @@ def main(argv):
         class_weight = {0: 1, 1: 100}
         
         clf = DecisionTreeClassifier(random_state=0, max_depth=6, class_weight='balanced')
+        #clf = GaussianNB()
+        #clf = BernoulliNB()
+        #clf = linear_model.SGDClassifier()
+        #clf = LinearSVC()
         clf = clf.fit(builderData.get_data(), builderData.get_target())
+
         features_importances = list(zip(builderData.get_categories(), ((math.ceil(x * 10000) / 100) for x in clf.feature_importances_)))
         sorted_features_importances = sorted(features_importances, key=lambda x: x[1], reverse=True)
         for i in sorted_features_importances:
