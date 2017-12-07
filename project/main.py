@@ -136,7 +136,7 @@ def main(argv):
 
         class_weight = {0: 1, 1: 100}
         
-        clf = DecisionTreeClassifier(random_state=0, max_depth=7, class_weight='balanced')
+        clf = DecisionTreeClassifier(random_state=0, max_depth=6, class_weight='balanced')
         clf = clf.fit(builderData.get_data(), builderData.get_target())
         features_importances = list(zip(builderData.get_categories(), ((math.ceil(x * 10000) / 100) for x in clf.feature_importances_)))
         sorted_features_importances = sorted(features_importances, key=lambda x: x[1], reverse=True)
