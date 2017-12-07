@@ -18,6 +18,9 @@ from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn.preprocessing import LabelEncoder
 import graphviz
 import pandas
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Setup logger
 LOGGER = logging.getLogger(__name__)
@@ -125,7 +128,7 @@ def main(argv):
             LOGGER.info(f'Export the encoded dataframe into {exportfile}')
             builderData.export_current_df(exportfile)
 
-        clf = DecisionTreeClassifier(max_depth=4)
+        clf = DecisionTreeClassifier(random_state=0, presort=True, max_depth=5)
         clf = clf.fit(builderData.get_data(), builderData.get_target())
         ################################
         ### SAVE FOR VISUAL RESULTS ####
@@ -139,6 +142,14 @@ def main(argv):
         builderTest = DecisionTreeBuilder(df, 'target') 
         scoreTree = clf.score(builderTest.get_data(), builderTest.get_target())
         print("Taux d'erreur: %.1f" % ((1 - scoreTree) * 100) + '%')
+        y_true = builderTest.get_target()
+        y_pred = clf.predict(builderTest.get_data())
+        conf = confusion_matrix(y_true, y_pred)
+        print(conf)
+        sns.heatmap(conf, square=True, annot=True, fmt='g', cbar=False, xticklabels=['Poor', 'Rich'], yticklabels=['Poor', 'Rich'])
+        plt.xlabel('valeurs prédites')
+        plt.ylabel('valeurs réelles')
+        plt.show()
     else:
         print_help()
 
