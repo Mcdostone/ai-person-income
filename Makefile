@@ -14,3 +14,6 @@ run:
 
 clean:
 	rm *.pdf
+
+
+# python ./project/main.py -f ./project/census-income-data.data -t ./project/census-income-test.test --save income.pdf

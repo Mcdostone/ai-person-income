@@ -102,8 +102,10 @@ def main(argv):
     testfile = ''
     exportfile = ''
     savefile = None
+    maxdepth = 6
+    balanced='balanced'
     try:
-        opts, _ = getopt.getopt(argv, 'f:t:s:e:', ['file=', 'test=', 'save=', 'export='])
+        opts, _ = getopt.getopt(argv, 'f:t:s:e:d:n', ['file=', 'test=', 'save=', 'export=', 'maxdepth=', 'notbalanced'])
         if len(opts) == 0:
             print_help()
             sys.exit(1)
@@ -122,6 +124,13 @@ def main(argv):
             savefile = arg
         if opt in ('-e', '--export'):
             exportfile = arg
+        if opt in ('-d', '--maxdepth'):
+            maxdepth = int(arg)
+        if opt in ('-n', '--notbalanced'):
+            balanced = None
+
+    LOGGER.info(f'Max depth for the tree: {maxdepth}')
+    LOGGER.info(f'Class weights: {balanced}')
 
     if len(opts) >= 2:
         df = import_data_file(datafile)
@@ -141,7 +150,7 @@ def main(argv):
 
         class_weight = {0: 1, 1: 100}
         
-        clf = DecisionTreeClassifier(random_state=0, max_depth=6, class_weight='balanced')
+        clf = DecisionTreeClassifier(random_state=0, max_depth=maxdepth, class_weight=balanced)
         #clf = GaussianNB()
         #clf = BernoulliNB()
         #clf = linear_model.SGDClassifier()
@@ -201,6 +210,8 @@ def print_help():
     parser.add_argument('-t', '--test', type=str, nargs=1, help='test file to use for the evaluation of the decision tree', required=True)
     parser.add_argument('-s', '--save', type=str, nargs=1, help='Save the decision tree in a PDF file')
     parser.add_argument('-e', '--export', type=str, nargs=1, help='Export the encoded file')
+    parser.add_argument('-d', '--maxdepth', type=int, nargs=1, help='Max depth of the tree')
+    parser.add_argument('-n', '--notbalanced',  nargs='*', default=False, help='the data are not adjusted depending on the frequencies in the data input file')
     parser.parse_args()
 
 
